@@ -1,0 +1,40 @@
+from pylab import *
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy import *
+from numpy import *
+import neuron
+import pyNN
+from pyNN import neuron
+from pyNN.standardmodels import electrodes, build_translations, StandardCurrentSource
+from pyNN.parameters import ParameterSpace, Sequence
+from pyNN.neuron import simulator
+from pyNN.utility import get_simulator, normalized_filename
+from pyNN.utility.plotting import Figure, Panel
+from neuron import h
+from quantities import mV
+%matplotlib inline
+from pyNN import neuron
+
+camp = linspace(-100, 300, 20)
+# in the two commented lines below I'm trying to create a nested for to iterate through a cell with current amplitude x given various voltage thresholds
+#vamp = linspace(-40, -100, 12)
+#for cell_id in arange(0,20):
+cell = neuron.Population(20, neuron.IF_curr_exp(v_thresh = -55.0, tau_refrac = 5.0, tau_m = 10.0))
+for cell_id in arange(0,19):
+    pulse = neuron.DCSource(amplitude = camp[cell_id], start = 10.0, stop = 60.0)
+    cell[cell_id].inject(pulse)
+cell.record('v')
+neuron.run(100.0)
+vm = cell.get_data().segments[0].filter(name = "v")[0]
+vm
+neuron.end()
+
+Figure(
+        Panel(vm, y_offset=-10 * mV, xticks=True, yticks=True,
+              xlabel="Time (ms)", ylabel="Membrane potential (mV)",
+              ylim=(-1250, -50)),
+        title="Current injection example"
+)
+
+print (vm)
